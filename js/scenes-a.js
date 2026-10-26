@@ -30,7 +30,6 @@ SCENES.q1 = function () {
   );
 };
 
-/* Q2 — свободный вечер: лампа и уют слева, чертёж не помещается в комнату, странные предметы на столе */
 SCENES.q2 = function () {
   var grid = [];
   for (var i = 0; i < 9; i++) grid.push(h('path', { key: 'g' + i, d: 'M' + (232 + i * 40) + ' 60 V280 M232 ' + (60 + i * 28) + ' H600', stroke: G, strokeWidth: 1.5, opacity: 0.35 }));
@@ -62,7 +61,7 @@ SCENES.q2 = function () {
   );
 };
 
-/* Q3 — командный проект: один стол, четыре характера вокруг презентации */
+
 SCENES.q3 = function () {
   return h(Stage, { label: 'Командный проект: четыре характера вокруг стола с презентацией: один сверяет чек-лист, другой вдохновляет, третий драматизирует, четвёртый замечает детали' },
     cut('scr', Rp(120, 28, 360, 172), K, { rough: true }),
@@ -70,15 +69,15 @@ SCENES.q3 = function () {
     h('path', { d: 'M150 90 H300 M150 112 H270 M150 134 H290', stroke: G, strokeWidth: 5, strokeLinecap: 'round' }),
     cut('lift', Rp(380, 80, 70, 100), M), h('path', { d: 'M415 80 V180 M395 120 l10 -10 l10 10 M395 142 l10 10 l10 -10', stroke: G, strokeWidth: 4, fill: 'none', strokeLinecap: 'round', strokeLinejoin: 'round' }),
     h('circle', { cx: 440, cy: 92, r: 30, fill: 'none', stroke: C, strokeWidth: 6 }), h('path', { d: 'M462 114 L492 148', stroke: C, strokeWidth: 8, strokeLinecap: 'round' }),
-    /* Дебюсси: замечает деталь */
+
     Torso('dt', 410, 262, 150, 160, G, { shirt: true }), Head('db', 484, 234, 0.95, 'beard', 'calm', { hair: P2 }),
-    /* Чайковский: драма */
+
     Torso('tt', 270, 270, 140, 150, C, { shirt: true }), Head('tc', 340, 244, 0.95, 'beard', 'o', { hair: P2 }),
     h('path', { d: 'M296 292 L262 262 M386 292 L420 262', stroke: C, strokeWidth: 26, strokeLinecap: 'round' }), ell('hl', 262, 258, 15, 15, K), ell('hr', 420, 258, 15, 15, K),
-    /* Рассказчик: силуэт без лица */
+
     Torso('ft', 130, 268, 130, 150, M, { shirt: true }), h('ellipse', { cx: 195, cy: 238, rx: 34, ry: 42, fill: G }), h('circle', { cx: 195, cy: 238, r: 40, fill: 'url(#htK)', opacity: 0.5 }),
     h('path', { d: 'M156 290 L120 240 L130 200', stroke: M, strokeWidth: 26, strokeLinecap: 'round', fill: 'none' }), h('path', { d: 'M130 200 L100 150', stroke: C, strokeWidth: 6, strokeLinecap: 'round' }), nt('hn', 104, 150, 0.7, C, -10),
-    /* Бетховен: чек-лист */
+
     Torso('bt', 4, 292, 120, 130, G, { shirt: true }), Head('bh', 64, 274, 0.8, 'wild', 'frown'),
     cut('clip', Rp(28, 316, 70, 90), K), [0, 1, 2].map(function (i) { return h('g', { key: 'c' + i }, h('path', { d: 'M38 ' + (340 + i * 22) + ' l6 6 l10 -12', stroke: C, strokeWidth: 5, fill: 'none', strokeLinecap: 'round' }), h('path', { d: 'M64 ' + (340 + i * 22) + ' h24', stroke: G, strokeWidth: 3 })); }),
     cut('tab', Rp(0, 388, 600, 32), M, { rough: true, dx: 0 })

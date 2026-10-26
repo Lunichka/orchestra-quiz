@@ -1,11 +1,6 @@
-/* =====================================================================
-   НАБОР ДЛЯ КОЛЛАЖЕЙ: бумажные вырезки со смещённой тенью, halftone, «архивные» головы.
-   Все цвета — из текущей палитры (G, C, M, K из графики hero) + один тёмный тон бумаги.
-   Лица композиторов — стилизованные вырезки-заглушки, не портреты. См. ASSETS_NEEDED.md.
-   ===================================================================== */
+
 var P2 = '#E2D6C8'; /* тёмная бумага */
 
-/* общие паттерны и фильтр; вставляются один раз в App */
 function SceneDefs() {
   function dots(id, color, r, step, rot, op) {
     return h('pattern', { id: id, width: step, height: step, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(' + rot + ')' },
@@ -33,7 +28,7 @@ function SceneDefs() {
 /* путь прямоугольника */
 function Rp(x, y, w, hh) { return 'M' + x + ' ' + y + 'h' + w + 'v' + hh + 'h' + (-w) + 'Z'; }
 
-/* вырезка: тень + фигура; d — путь, fill — цвет или url(#pattern) */
+
 function cut(k, d, fill, o) {
   o = o || {};
   var dx = o.dx === undefined ? 6 : o.dx, sw = o.sw || 4;
@@ -54,8 +49,10 @@ function ell(k, cx, cy, rx, ry, fill, o) {
 /* текст-плашка шрифтом бренда-заменителя */
 function tx(k, x, y, s, t, o) {
   o = o || {};
-  return h('text', { key: k, x: x, y: y, fontFamily: o.f || 'Unbounded, Arial Black, sans-serif', fontWeight: 800, fontSize: s, fill: o.fill || G,
-    textAnchor: o.a || 'start', letterSpacing: o.ls || 0, transform: o.rot ? 'rotate(' + o.rot + ' ' + x + ' ' + y + ')' : undefined }, t);
+  return h('text', {
+    key: k, x: x, y: y, fontFamily: o.f || 'Unbounded, Arial Black, sans-serif', fontWeight: 800, fontSize: s, fill: o.fill || G,
+    textAnchor: o.a || 'start', letterSpacing: o.ls || 0, transform: o.rot ? 'rotate(' + o.rot + ' ' + x + ' ' + y + ')' : undefined
+  }, t);
 }
 /* нота-штрих (просто знак, без тени) */
 function nt(k, x, y, s, fill, rot) {
@@ -124,7 +121,7 @@ function Torso(k, x, y, w, hh, fill, o) {
   return out;
 }
 
-/* рамка-сцена: бумажный лист с наклоном, на нём фон и нотные линейки; дети — коллаж */
+
 function Stage(p) {
   var ys = [60, 90, 120, 150, 180], hid = 0, i;
   for (i = 0; i < p.label.length; i++) hid = (hid * 31 + p.label.charCodeAt(i)) % 100000;
