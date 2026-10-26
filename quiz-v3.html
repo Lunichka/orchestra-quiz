@@ -1524,7 +1524,8 @@
     bottom: 0;
     z-index: 4;
     margin: 0;
-    height: min(94svh, 1180px);
+    /* 61vw — чтобы на узких десктопах (≈900–1200px) фото не заходило под заголовок */
+    height: min(94svh, 1180px, 61vw);
     aspect-ratio: 1400 / 1477;
     pointer-events: none;
     user-select: none;
@@ -1554,16 +1555,246 @@
     animation: fed-paper-in .85s cubic-bezier(.2, .8, .2, 1) 0s both, fed-paper-float 7s ease-in-out 1.6s infinite alternate;
   }
 
+  /* тень и скотч появляются, когда stop-frame последовательность остановилась на основном кадре */
   .fedorov-hero-img--shadow {
-    animation: fed-shadow-in 1.05s cubic-bezier(.2, .8, .2, 1) .18s both;
-  }
-
-  .fedorov-hero-img--figure {
-    animation: fed-figure-in 1s cubic-bezier(.2, .8, .2, 1) .32s both;
+    animation: fed-shadow-in 1.05s cubic-bezier(.2, .8, .2, 1) 1.5s both;
   }
 
   .fedorov-hero-img--front {
-    animation: fed-tape-in .5s cubic-bezier(.34, 1.56, .64, 1) 1.15s both;
+    animation: fed-tape-in .5s cubic-bezier(.34, 1.56, .64, 1) 2.05s both;
+  }
+
+  /* ---------- stop-frame: кадры одной фотосессии вклеиваются друг поверх друга ----------
+     Все кадры лежат в одной обёртке параллакса (depth 22). Каждый кадр — своя анимация
+     одинаковой длины (1.3s, старт .25s) с steps(1,end): значения не плавно перетекают,
+     а «щёлкают» кадр за кадром, как в стоп-моушене. Таймеров в JS нет. */
+  .fed-frame {
+    position: absolute;
+    /* кадры лежат точно друг на друге */
+    inset: 0;
+    transform-origin: 50% 60%;
+    visibility: hidden;
+    /* промежуточные кадры видны только внутри анимации */
+    animation-duration: 1.3s;
+    animation-delay: .25s;
+    animation-timing-function: steps(1, end);
+    animation-fill-mode: both;
+  }
+
+  .fed-frame--posed {
+    animation-name: fed-seq-posed;
+  }
+
+  .fed-frame--print {
+    animation-name: fed-seq-print;
+  }
+
+  /* основной кадр видим по умолчанию: так он остаётся на месте при reduced-motion и при уходе */
+  .fed-frame--laughing {
+    visibility: visible;
+    animation-name: fed-seq-laughing;
+  }
+
+  /* фото-отпечаток (кадр «выглядывает» — с ширмой, поэтому прямоугольный, а не вырезанный) */
+  .fedorov-hero-img.fed-print {
+    position: absolute;
+    right: auto;
+    bottom: auto;
+    width: 52%;
+    height: auto;
+    aspect-ratio: 882 / 1062;
+    left: 25%;
+    top: 12%;
+  }
+
+  /* маленький дополнительный кадр, остаётся после последовательности */
+  .fedorov-hero-img.fed-mini {
+    position: absolute;
+    right: auto;
+    bottom: auto;
+    width: 19%;
+    height: auto;
+    aspect-ratio: 882 / 1062;
+    left: 69%;
+    top: 9%;
+    transform: rotate(6deg);
+    animation: fed-mini-in .5s steps(1, end) 1.95s both;
+  }
+
+  @keyframes fed-seq-posed {
+    0% {
+      visibility: hidden;
+      transform: none
+    }
+
+    1% {
+      visibility: visible;
+      transform: translate3d(2%, 3%, 0) rotate(-3deg) scale(1.06)
+    }
+
+    7.4% {
+      visibility: visible;
+      transform: translate3d(.4%, .6%, 0) rotate(-1.4deg) scale(1.01)
+    }
+
+    13.8% {
+      visibility: visible;
+      transform: translate3d(0, 0, 0) rotate(-1deg)
+    }
+
+    24% {
+      visibility: hidden;
+      transform: none
+    }
+
+    62% {
+      visibility: visible;
+      transform: translate3d(-1.6%, .8%, 0) rotate(1.8deg) scale(1.03)
+    }
+
+    67% {
+      visibility: visible;
+      transform: translate3d(-1%, .4%, 0) rotate(1.2deg)
+    }
+
+    72%,
+    100% {
+      visibility: hidden;
+      transform: none
+    }
+  }
+
+  @keyframes fed-seq-print {
+    0% {
+      visibility: hidden;
+      transform: none
+    }
+
+    24% {
+      visibility: visible;
+      transform: translate3d(7%, -3%, 0) rotate(8deg) scale(1.1)
+    }
+
+    30.4% {
+      visibility: visible;
+      transform: translate3d(3%, -1%, 0) rotate(5deg) scale(1.02)
+    }
+
+    36.8% {
+      visibility: visible;
+      transform: translate3d(2.4%, -.6%, 0) rotate(4deg)
+    }
+
+    46% {
+      visibility: hidden;
+      transform: none
+    }
+
+    72% {
+      visibility: visible;
+      transform: translate3d(5%, 4%, 0) rotate(-7deg) scale(1.05)
+    }
+
+    77% {
+      visibility: visible;
+      transform: translate3d(4%, 3.4%, 0) rotate(-6deg)
+    }
+
+    80%,
+    100% {
+      visibility: hidden;
+      transform: none
+    }
+  }
+
+  @keyframes fed-seq-laughing {
+    0% {
+      visibility: hidden;
+      transform: none
+    }
+
+    46% {
+      visibility: visible;
+      transform: translate3d(-2%, 2%, 0) rotate(2.5deg) scale(1.05)
+    }
+
+    52.4% {
+      visibility: visible;
+      transform: translate3d(-.6%, .6%, 0) rotate(1deg)
+    }
+
+    62% {
+      visibility: hidden;
+      transform: none
+    }
+
+    80% {
+      visibility: visible;
+      transform: translate3d(1.6%, 1.6%, 0) rotate(-2.2deg) scale(1.05)
+    }
+
+    86.4% {
+      visibility: visible;
+      transform: translate3d(.5%, .3%, 0) rotate(-.6deg) scale(1.01)
+    }
+
+    92.8%,
+    100% {
+      visibility: visible;
+      transform: none
+    }
+  }
+
+  @keyframes fed-mini-in {
+    0% {
+      visibility: hidden;
+      transform: rotate(6deg)
+    }
+
+    1% {
+      visibility: visible;
+      transform: translate3d(30%, -18%, 0) rotate(20deg) scale(1.45)
+    }
+
+    20% {
+      visibility: visible;
+      transform: translate3d(8%, -4%, 0) rotate(11deg) scale(1.1)
+    }
+
+    40%,
+    100% {
+      visibility: visible;
+      transform: rotate(6deg)
+    }
+  }
+
+  /* повторный приход на главную: последовательность не повторяется,
+     основной кадр просто въезжает, как раньше въезжала фигура */
+  .fedorov-hero-figure.is-seq-done .fed-frame--posed,
+  .fedorov-hero-figure.is-seq-done .fed-frame--print {
+    animation: none;
+    visibility: hidden;
+  }
+
+  .fedorov-hero-figure.is-seq-done .fed-frame--laughing {
+    animation: fed-figure-in 1s cubic-bezier(.2, .8, .2, 1) .32s both;
+  }
+
+  .fedorov-hero-figure.is-seq-done .fedorov-hero-img--shadow {
+    animation-delay: .18s;
+  }
+
+  .fedorov-hero-figure.is-seq-done .fedorov-hero-img--front {
+    animation-delay: 1.15s;
+  }
+
+  .fedorov-hero-figure.is-seq-done .fed-mini {
+    animation-delay: 1s;
+  }
+
+  /* пока картинки не декодированы — все слои ждут (шорткат animation выше сбрасывает play-state) */
+  .fedorov-hero-figure:not(.is-ready) .fedorov-hero-img {
+    animation-play-state: paused;
   }
 
   @keyframes fed-paper-in {
@@ -1640,8 +1871,18 @@
     animation: fed-out-right .4s cubic-bezier(.5, 0, .9, .4) 0s both;
   }
 
-  .fedorov-hero-figure.is-leaving .fedorov-hero-img--figure {
+  .fedorov-hero-figure.is-leaving .fed-frame--laughing {
     animation: fed-out-right .55s cubic-bezier(.5, 0, .9, .4) .06s both;
+  }
+
+  .fedorov-hero-figure.is-leaving .fed-mini {
+    animation: fed-out-right .45s cubic-bezier(.5, 0, .9, .4) 0s both;
+  }
+
+  .fedorov-hero-figure.is-leaving .fed-frame--posed,
+  .fedorov-hero-figure.is-leaving .fed-frame--print {
+    animation: none;
+    visibility: hidden;
   }
 
   .fedorov-hero-figure.is-leaving .fedorov-hero-img--shadow {
@@ -1660,10 +1901,21 @@
   }
 
   @media (max-width:860px) {
+
+    /* фигура занимает только место под кнопкой: --fed-safe-top измеряет Hero (низ .cta-wrap + отступ).
+       Голова кадра (~44% ширины холста) держится на 58vw, как бы ни менялся размер. */
     .fedorov-hero-figure {
-      right: -18vw;
-      height: auto;
-      width: 104vw;
+      right: auto;
+      left: 58vw;
+      transform: translateX(-44%);
+      width: auto;
+      height: max(220px, min(calc(104vw * 1477 / 1400), calc(100% - var(--fed-safe-top, 0px))));
+    }
+
+    .fedorov-hero-img.fed-mini {
+      left: 62%;
+      top: 6%;
+      width: 21%;
     }
 
     .fedorov-hero-depth {
@@ -1761,6 +2013,822 @@
       max-height: 56vh;
     }
   }
+
+
+
+  /* COMPOSERS_CSS:BEGIN */
+  /* =====================================================================
+     Коллажи композиторов на страницах вопросов.
+     Слои кладутся в процентах на холст 960×1200 (4:5) — как прежние картинки вопросов.
+     Каждая анимация одноразовая: проигрывается при открытии вопроса (экран
+     вопроса пересоздаётся при переходе), стартует после декодирования картинок.
+     Базовые стили = финальная композиция (её же видно при reduced-motion).
+     ===================================================================== */
+  .cs {
+    position: relative;
+    width: min(100%, calc(min(44vh, 440px) * .8));
+    aspect-ratio: 4 / 5;
+    flex: none;
+    contain: layout paint;
+    user-select: none;
+  }
+
+  .cs-l {
+    position: absolute;
+    display: block;
+    max-width: none;
+    pointer-events: none;
+    backface-visibility: hidden;
+    animation-fill-mode: both;
+  }
+
+  .cs:not(.is-ready) .cs-l {
+    animation-play-state: paused !important;
+  }
+
+  @media (max-width: 760px) {
+    .cs {
+      width: min(100%, calc(34vh * .8));
+    }
+
+    /* на телефоне оставляем главное движение, второстепенные — статично */
+    .cs .cs-sec {
+      animation: none !important;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cs .cs-l {
+      animation: none !important;
+    }
+  }
+
+  /* ---------- Бетховен: голова раскрывается, изнутри вылетают ноты и механизмы ---------- */
+  .cs--beethoven .b-cap {
+    transform-origin: 10% 92%;
+    animation: b-lid 2.7s cubic-bezier(.3, 1.3, .5, 1) .2s both;
+  }
+
+  @keyframes b-lid {
+    0% {
+      transform: none
+    }
+
+    13% {
+      transform: translateY(-17%) rotate(-17deg)
+    }
+
+    19% {
+      transform: translateY(-14%) rotate(-13deg)
+    }
+
+    24% {
+      transform: translateY(-15%) rotate(-14deg)
+    }
+
+    66% {
+      transform: translateY(-15%) rotate(-14deg)
+    }
+
+    78% {
+      transform: translateY(1.5%) rotate(1.5deg)
+    }
+
+    84% {
+      transform: translateY(-1%) rotate(-.6deg)
+    }
+
+    90%,
+    100% {
+      transform: none
+    }
+  }
+
+  .cs--beethoven .b-fly {
+    animation: b-fly 1s cubic-bezier(.2, .75, .3, 1) both;
+    animation-delay: calc(.48s + var(--i, 0) * .08s);
+  }
+
+  @keyframes b-fly {
+    0% {
+      transform: translate(var(--sx), var(--sy)) scale(.2) rotate(-50deg);
+      opacity: 0
+    }
+
+    10% {
+      opacity: 1
+    }
+
+    45% {
+      transform: translate(var(--ax), var(--ay)) scale(.95) rotate(14deg);
+      opacity: 1
+    }
+
+    72% {
+      transform: translate(0, -7%) scale(1.04) rotate(-5deg)
+    }
+
+    86% {
+      transform: translate(0, 2%) rotate(2deg)
+    }
+
+    100% {
+      transform: none;
+      opacity: 1
+    }
+  }
+
+  /* ---------- Чайковский: сонные глаза → «удивился» (глаза резко увеличиваются), повтор после паузы ---------- */
+  .cs--tchaikovsky .t-half {
+    visibility: hidden;
+    /* финал — открытые глаза */
+    animation: t-half 3.2s steps(1, end) .25s both;
+  }
+
+  @keyframes t-half {
+    0% {
+      visibility: visible
+    }
+
+    16% {
+      visibility: hidden
+    }
+
+    58% {
+      visibility: visible
+    }
+
+    63%,
+    100% {
+      visibility: hidden
+    }
+  }
+
+  .cs--tchaikovsky .t-open {
+    transform-origin: 50% 50%;
+    animation: t-open 3.2s cubic-bezier(.2, .9, .3, 1.2) .25s both;
+  }
+
+  @keyframes t-open {
+    0% {
+      visibility: hidden;
+      transform: none
+    }
+
+    15.9% {
+      visibility: hidden;
+      transform: scale(.9)
+    }
+
+    16% {
+      visibility: visible;
+      transform: scale(.9)
+    }
+
+    22% {
+      transform: scale(1.62)
+    }
+
+    27% {
+      transform: scale(1.48)
+    }
+
+    38% {
+      transform: scale(.94)
+    }
+
+    44%,
+    57.9% {
+      visibility: visible;
+      transform: none
+    }
+
+    58% {
+      visibility: hidden
+    }
+
+    62.9% {
+      visibility: hidden;
+      transform: none
+    }
+
+    63% {
+      visibility: visible;
+      transform: scale(1)
+    }
+
+    69% {
+      transform: scale(1.4)
+    }
+
+    80% {
+      transform: scale(.97)
+    }
+
+    88%,
+    100% {
+      visibility: visible;
+      transform: none
+    }
+  }
+
+  .cs--tchaikovsky .t-sway {
+    transform-origin: 50% 20%;
+    animation: t-sway 2.6s ease-in-out both;
+    animation-delay: calc(.2s + var(--i, 0) * .18s);
+  }
+
+  @keyframes t-sway {
+    0% {
+      transform: rotate(0) translateY(-14%)
+    }
+
+    30% {
+      transform: rotate(-9deg) translateY(4%)
+    }
+
+    60% {
+      transform: rotate(6deg)
+    }
+
+    100% {
+      transform: none
+    }
+  }
+
+  .cs--tchaikovsky .t-drift {
+    animation: t-drift 2.4s cubic-bezier(.3, .7, .3, 1) both;
+    animation-delay: calc(.6s + var(--i, 0) * .1s);
+  }
+
+  @keyframes t-drift {
+    0% {
+      transform: translate(-12%, 10%) rotate(-10deg)
+    }
+
+    50% {
+      transform: translate(5%, -6%) rotate(6deg)
+    }
+
+    100% {
+      transform: none
+    }
+  }
+
+  /* ---------- Стравинский: пластинки вместо глаз крутятся, на секунду «заедают» и едут дальше ---------- */
+  .cs--stravinsky .s-vinyl {
+    transform-origin: 50% 50%;
+    animation: s-spin 3.4s linear both;
+    animation-delay: calc(.35s + var(--i, 0) * .06s);
+  }
+
+  @keyframes s-spin {
+    0% {
+      transform: rotate(0)
+    }
+
+    38% {
+      transform: rotate(540deg)
+    }
+
+    41% {
+      transform: rotate(552deg)
+    }
+
+    44% {
+      transform: rotate(536deg)
+    }
+
+    47% {
+      transform: rotate(552deg)
+    }
+
+    50% {
+      transform: rotate(540deg)
+    }
+
+    56% {
+      transform: rotate(540deg)
+    }
+
+    100% {
+      transform: rotate(1080deg)
+    }
+  }
+
+  .cs--stravinsky .s-circle {
+    animation: s-from-right .8s cubic-bezier(.2, .9, .3, 1.15) .1s both;
+  }
+
+  .cs--stravinsky .s-bar {
+    animation: s-from-left .7s cubic-bezier(.2, .9, .3, 1.1) .2s both;
+  }
+
+  .cs--stravinsky .s-tri {
+    animation: s-drop .7s cubic-bezier(.3, 1.4, .5, 1) .45s both;
+  }
+
+  @keyframes s-from-right {
+    from {
+      transform: translateX(60%) rotate(30deg)
+    }
+
+    to {
+      transform: none
+    }
+  }
+
+  @keyframes s-from-left {
+    from {
+      transform: translateX(-70%)
+    }
+
+    to {
+      transform: none
+    }
+  }
+
+  @keyframes s-drop {
+    from {
+      transform: translateY(-120%) rotate(-40deg)
+    }
+
+    to {
+      transform: none
+    }
+  }
+
+  /* ---------- Шопен: слёзы по очереди стекают, капли падают и превращаются в бумажные ноты ---------- */
+  .cs--chopin .c-tless {
+    visibility: hidden;
+    animation: c-t1 3.6s steps(1, end) .2s both;
+  }
+
+  .cs--chopin .c-tmid {
+    animation: c-t2 3.6s steps(1, end) .2s both;
+  }
+
+  .cs--chopin .c-tmore {
+    visibility: hidden;
+    animation: c-t3 3.6s steps(1, end) .2s both;
+  }
+
+  @keyframes c-t1 {
+    0% {
+      visibility: visible
+    }
+
+    22%,
+    100% {
+      visibility: hidden
+    }
+  }
+
+  @keyframes c-t2 {
+    0% {
+      visibility: hidden
+    }
+
+    22% {
+      visibility: visible
+    }
+
+    48% {
+      visibility: hidden
+    }
+
+    74%,
+    100% {
+      visibility: visible
+    }
+  }
+
+  @keyframes c-t3 {
+    0% {
+      visibility: hidden
+    }
+
+    48% {
+      visibility: visible
+    }
+
+    74%,
+    100% {
+      visibility: hidden
+    }
+  }
+
+  .cs--chopin .c-drop {
+    opacity: 0;
+    /* в финале капель нет — они стали нотами */
+    animation: c-drop 1.1s cubic-bezier(.55, 0, .85, .4) both;
+    animation-delay: calc(1s + var(--i, 0) * .55s);
+  }
+
+  @keyframes c-drop {
+    0% {
+      opacity: 0;
+      transform: scale(.4)
+    }
+
+    12% {
+      opacity: 1;
+      transform: none
+    }
+
+    88% {
+      opacity: 1;
+      transform: translateY(var(--dy))
+    }
+
+    100% {
+      opacity: 0;
+      transform: translateY(var(--dy)) scale(.3)
+    }
+  }
+
+  .cs--chopin .c-note {
+    animation: c-note .6s cubic-bezier(.3, 1.5, .5, 1) both;
+    animation-delay: calc(1.95s + var(--i, 0) * .55s);
+  }
+
+  @keyframes c-note {
+    from {
+      opacity: 0;
+      transform: scale(.2) rotate(-30deg)
+    }
+
+    to {
+      opacity: 1;
+      transform: none
+    }
+  }
+
+  .cs--chopin .c-phones {
+    transform-origin: 50% 60%;
+    animation: c-pulse 2.4s ease-in-out .4s both;
+  }
+
+  @keyframes c-pulse {
+
+    0%,
+    40%,
+    80%,
+    100% {
+      transform: none
+    }
+
+    20%,
+    60% {
+      transform: scale(1.025)
+    }
+  }
+
+  .cs--chopin .c-wave {
+    animation: c-wave 2.4s ease-in-out .4s both;
+  }
+
+  @keyframes c-wave {
+    0% {
+      opacity: 0
+    }
+
+    20% {
+      opacity: 1
+    }
+
+    40% {
+      opacity: .35
+    }
+
+    60% {
+      opacity: 1
+    }
+
+    80% {
+      opacity: .5
+    }
+
+    100% {
+      opacity: 1
+    }
+  }
+
+  /* ---------- Моцарт: кассета «ШАНСОН» подъезжает, катушки крутятся, из наушника утекают ноты ---------- */
+  .cs--mozart .m-cas {
+    animation: m-cas .9s cubic-bezier(.2, .9, .3, 1.15) .15s both;
+  }
+
+  @keyframes m-cas {
+    0% {
+      transform: translateY(var(--ty)) rotate(-6deg)
+    }
+
+    65% {
+      transform: translateY(-2%) rotate(1.5deg)
+    }
+
+    100% {
+      transform: none
+    }
+  }
+
+  .cs--mozart .m-reel {
+    transform-origin: 50% 50%;
+    animation: m-reel-in .9s cubic-bezier(.2, .9, .3, 1.15) .15s both, m-reel 2.6s linear 1.05s both;
+  }
+
+  @keyframes m-reel-in {
+    0% {
+      translate: 0 var(--ty)
+    }
+
+    100% {
+      translate: 0 0
+    }
+  }
+
+  @keyframes m-reel {
+    0% {
+      transform: rotate(0)
+    }
+
+    100% {
+      transform: rotate(-1080deg)
+    }
+  }
+
+  .cs--mozart .m-wire {
+    animation: m-fade .4s ease-out .7s both;
+  }
+
+  .cs--mozart .m-bud {
+    animation: m-pop .45s cubic-bezier(.3, 1.6, .5, 1) .85s both;
+  }
+
+  .cs--mozart .m-cas-tape {
+    animation: m-tape .4s cubic-bezier(.3, 1.6, .5, 1) 1s both;
+  }
+
+  @keyframes m-fade {
+    from {
+      opacity: 0
+    }
+
+    to {
+      opacity: 1
+    }
+  }
+
+  @keyframes m-pop {
+    from {
+      transform: scale(0)
+    }
+
+    to {
+      transform: none
+    }
+  }
+
+  @keyframes m-tape {
+    from {
+      opacity: 0;
+      transform: scale(1.6) rotate(-14deg)
+    }
+
+    to {
+      opacity: 1;
+      transform: none
+    }
+  }
+
+  .cs--mozart .m-leak {
+    animation: m-leak 1s cubic-bezier(.2, .8, .3, 1.1) both;
+    animation-delay: calc(1.3s + var(--i, 0) * .35s);
+  }
+
+  @keyframes m-leak {
+    0% {
+      opacity: 0;
+      transform: translate(var(--sx), var(--sy)) scale(.2)
+    }
+
+    25% {
+      opacity: 1
+    }
+
+    100% {
+      opacity: 1;
+      transform: none
+    }
+  }
+
+  /* ---------- Прокофьев: удар гитары — она влетает в кадр, всё вздрагивает и разлетается ---------- */
+  .cs--prokofiev .p-guitar {
+    transform-origin: 30% 70%;
+    animation: p-guitar .6s cubic-bezier(.5, 0, .7, .5) .3s both;
+  }
+
+  @keyframes p-guitar {
+    0% {
+      opacity: 0;
+      transform: translate(70%, 40%) rotate(40deg) scale(1.3)
+    }
+
+    20% {
+      opacity: 1
+    }
+
+    70% {
+      transform: translate(-3%, 2%) rotate(-5deg) scale(1.02)
+    }
+
+    85% {
+      transform: translate(1.5%, -1%) rotate(2deg)
+    }
+
+    100% {
+      opacity: 1;
+      transform: none
+    }
+  }
+
+  .cs--prokofiev .p-pop {
+    animation: p-pop .55s cubic-bezier(.15, .9, .3, 1.25) both;
+    animation-delay: calc(.74s + var(--i, 0) * .04s);
+  }
+
+  @keyframes p-pop {
+    0% {
+      opacity: 0;
+      transform: translate(var(--sx), var(--sy)) scale(.15) rotate(-60deg)
+    }
+
+    30% {
+      opacity: 1
+    }
+
+    100% {
+      opacity: 1;
+      transform: none
+    }
+  }
+
+  .cs--prokofiev .p-shake {
+    animation: p-shake .45s linear .82s both;
+  }
+
+  .cs--prokofiev .p-shake2 {
+    animation-delay: .86s;
+  }
+
+  @keyframes p-shake {
+
+    0%,
+    100% {
+      transform: none
+    }
+
+    20% {
+      transform: translate(-2.5%, 1.5%) rotate(-1.5deg)
+    }
+
+    45% {
+      transform: translate(2%, -1%) rotate(1deg)
+    }
+
+    70% {
+      transform: translate(-1%, .5%)
+    }
+  }
+
+  .cs--prokofiev .p-hand {
+    transform-origin: 50% 100%;
+    animation: p-hand .6s cubic-bezier(.3, 1.6, .5, 1) 1.15s both;
+  }
+
+  @keyframes p-hand {
+    0% {
+      transform: translateY(40%) rotate(-18deg)
+    }
+
+    100% {
+      transform: none
+    }
+  }
+
+  /* ---------- Бах: невозмутимо сводит — пластинка крутится со «скретчем», фейдеры ходят, ноты вылетают ---------- */
+  .cs--bach .bh-record {
+    transform-origin: 50% 50%;
+    animation: bh-spin 3.2s linear .5s both;
+  }
+
+  @keyframes bh-spin {
+    0% {
+      transform: rotate(0)
+    }
+
+    40% {
+      transform: rotate(540deg)
+    }
+
+    46% {
+      transform: rotate(480deg)
+    }
+
+    52% {
+      transform: rotate(560deg)
+    }
+
+    58% {
+      transform: rotate(500deg)
+    }
+
+    64% {
+      transform: rotate(540deg)
+    }
+
+    100% {
+      transform: rotate(1080deg)
+    }
+  }
+
+  .cs--bach .bh-arm {
+    transform-origin: 82% 13%;
+    animation: bh-arm .7s cubic-bezier(.3, 1.3, .5, 1) .15s both;
+  }
+
+  @keyframes bh-arm {
+    from {
+      transform: rotate(-28deg)
+    }
+
+    to {
+      transform: none
+    }
+  }
+
+  .cs--bach .bh-fader {
+    animation: bh-fader 2.4s ease-in-out both;
+    animation-delay: calc(.7s + var(--i, 0) * .15s);
+  }
+
+  @keyframes bh-fader {
+    0% {
+      transform: translateY(160%)
+    }
+
+    35% {
+      transform: translateY(-120%)
+    }
+
+    60% {
+      transform: translateY(80%)
+    }
+
+    100% {
+      transform: none
+    }
+  }
+
+  .cs--bach .bh-note {
+    animation: bh-note .9s cubic-bezier(.2, .8, .3, 1.15) both;
+    animation-delay: calc(1.5s + var(--i, 0) * .3s);
+  }
+
+  @keyframes bh-note {
+    0% {
+      opacity: 0;
+      transform: translate(var(--sx), var(--sy)) scale(.2) rotate(90deg)
+    }
+
+    25% {
+      opacity: 1
+    }
+
+    100% {
+      opacity: 1;
+      transform: none
+    }
+  }
+
+  .cs--bach .bh-phones {
+    animation: bh-phones .6s cubic-bezier(.3, 1.5, .5, 1) .1s both;
+  }
+
+  @keyframes bh-phones {
+    from {
+      transform: translateY(-40%) scale(1.1);
+      opacity: 0
+    }
+
+    to {
+      transform: none;
+      opacity: 1
+    }
+  }
+
+  /* COMPOSERS_CSS:END */
 </style>
 <div id="root"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
@@ -2567,22 +3635,57 @@
         return h('div', { className: 'in ' + p.cls, style: Object.assign(st, p.style || {}) }, p.children);
       }
 
+      // stop-frame последовательность фото на главной проигрывается один раз за сессию страницы;
+      // при возвращении на главную сразу показывается итоговая композиция
+      var FED_SEQ_PLAYED = false;
+
       function Hero(p) {
         var rootRef = useRef(null);
+        var seqDone = useRef(FED_SEQ_PLAYED).current;
+        useEffect(function () { FED_SEQ_PLAYED = true; }, []);
+
+        // мобильная раскладка: фото не должно заходить под заголовок и кнопку.
+        // Меряем низ кнопки по layout-координатам (offsetTop не учитывает анимационные transform).
+        useEffect(function () {
+          var root = rootRef.current;
+          var fig = root && root.querySelector('[data-fedorov-figure]');
+          var cta = root && root.querySelector('.cta-wrap');
+          if (!fig || !cta || !window.matchMedia) return;
+          var mq = matchMedia('(max-width:860px)');
+          var raf = 0;
+          function measure() {
+            raf = 0;
+            if (!mq.matches) { fig.style.removeProperty('--fed-safe-top'); return; }
+            var y = 0, el = cta;
+            while (el && el !== root) { y += el.offsetTop; el = el.offsetParent; }
+            fig.style.setProperty('--fed-safe-top', Math.round(y + cta.offsetHeight + 16) + 'px');
+          }
+          function schedule() { if (!raf) raf = requestAnimationFrame(measure); }
+          measure();
+          var ro = window.ResizeObserver ? new ResizeObserver(schedule) : null;
+          if (ro) { ro.observe(root); var copy = root.querySelector('.copy'); if (copy) ro.observe(copy); }
+          else window.addEventListener('resize', schedule);
+          return function () {
+            if (ro) ro.disconnect(); else window.removeEventListener('resize', schedule);
+            if (raf) cancelAnimationFrame(raf);
+          };
+        }, []);
         useEffect(function () {
           var fig = rootRef.current && rootRef.current.querySelector('[data-fedorov-figure]');
           if (!fig) return;
           var imgs = Array.prototype.slice.call(fig.querySelectorAll('img'));
           var decoded = Promise.all(imgs.map(function (img) { return img.decode ? img.decode().catch(function () { }) : Promise.resolve(); }));
-          var fallback = new Promise(function (resolve) { setTimeout(resolve, 1500); });
-          Promise.race([decoded, fallback]).then(function () { if (fig.isConnected) fig.classList.add('is-ready'); });
+          var fallbackTimer = 0;
+          var fallback = new Promise(function (resolve) { fallbackTimer = setTimeout(resolve, 1500); });
+          Promise.race([decoded, fallback]).then(function () { clearTimeout(fallbackTimer); if (fig.isConnected) fig.classList.add('is-ready'); });
           if (p.pressed) fig.classList.add('is-leaving'); else fig.classList.remove('is-leaving');
           var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
           var coarse = window.matchMedia && matchMedia('(hover: none)').matches;
-          if (reduce || coarse) return;
+          if (reduce || coarse) return function () { clearTimeout(fallbackTimer); };
+          var root = rootRef.current;   // ref обнуляется до cleanup — держим узел в замыкании
           var tx = 0, ty = 0, x = 0, y = 0, raf = 0, visible = true;
           function move(e) {
-            var r = rootRef.current.getBoundingClientRect();
+            var r = root.getBoundingClientRect();
             tx = (e.clientX - r.left) / r.width - .5;
             ty = (e.clientY - r.top) / r.height - .5;
           }
@@ -2598,14 +3701,15 @@
             if (visible && !raf) raf = requestAnimationFrame(tick);
             if (!visible && raf) { cancelAnimationFrame(raf); raf = 0; }
           });
-          observer.observe(rootRef.current);
-          rootRef.current.addEventListener('pointermove', move, { passive: true });
-          rootRef.current.addEventListener('pointerleave', leave);
+          observer.observe(root);
+          root.addEventListener('pointermove', move, { passive: true });
+          root.addEventListener('pointerleave', leave);
           raf = requestAnimationFrame(tick);
           return function () {
+            clearTimeout(fallbackTimer);
             observer.disconnect();
-            rootRef.current && rootRef.current.removeEventListener('pointermove', move);
-            rootRef.current && rootRef.current.removeEventListener('pointerleave', leave);
+            root.removeEventListener('pointermove', move);
+            root.removeEventListener('pointerleave', leave);
             if (raf) cancelAnimationFrame(raf);
           };
         }, [p.pressed]);
@@ -2633,11 +3737,20 @@
         }, []);
 
         return h('section', { className: 'hero', ref: rootRef, 'aria-labelledby': 'ttl' },
-          h('figure', { className: 'fedorov-hero-figure', 'data-fedorov-figure': true, 'aria-label': 'Георгий Фёдоров, художественный руководитель оркестра' },
+          h('figure', { className: 'fedorov-hero-figure' + (seqDone ? ' is-seq-done' : ''), 'data-fedorov-figure': true, 'aria-label': 'Георгий Фёдоров, художественный руководитель оркестра' },
             h('div', { className: 'fedorov-hero-depth', style: { '--depth': -70 }, 'aria-hidden': true }, h('img', { className: 'fedorov-hero-img fedorov-hero-img--back', src: 'images/fedorov-hero/fedorov-paper-back.webp', alt: '', width: 1400, height: 1477, decoding: 'async' })),
-            h('div', { className: 'fedorov-hero-depth', style: { '--depth': 46 }, 'aria-hidden': true }, h('img', { className: 'fedorov-hero-img fedorov-hero-img--shadow', src: 'images/fedorov-hero/fedorov-shadow.webp', alt: '', width: 1400, height: 1477, decoding: 'async' })),
-            h('div', { className: 'fedorov-hero-depth', style: { '--depth': 22 } }, h('img', { className: 'fedorov-hero-img fedorov-hero-img--figure', src: 'images/fedorov-hero/fedorov-figure.webp', alt: '', width: 1400, height: 1477, decoding: 'async', fetchPriority: 'high' })),
-            h('div', { className: 'fedorov-hero-depth', style: { '--depth': -30 }, 'aria-hidden': true }, h('img', { className: 'fedorov-hero-img fedorov-hero-img--front', src: 'images/fedorov-hero/fedorov-paper-front.webp', alt: '', width: 1400, height: 1477, decoding: 'async' }))
+            h('div', { className: 'fedorov-hero-depth', style: { '--depth': 46 }, 'aria-hidden': true }, h('img', { className: 'fedorov-hero-img fedorov-hero-img--shadow', src: 'images/fedorov-hero/fedorov-shadow-laughing.webp', alt: '', width: 1400, height: 1477, decoding: 'async' })),
+            // stop-frame: кадры одной фотосессии; итоговый — «смеётся»
+            h('div', { className: 'fedorov-hero-depth', style: { '--depth': 22 }, 'aria-hidden': true },
+              h('img', { className: 'fedorov-hero-img fed-frame fed-frame--posed', src: 'images/fedorov-hero/fedorov-frame-posed.webp', alt: '', width: 1400, height: 1477, decoding: 'async', fetchPriority: 'high' }),
+              h('img', { className: 'fedorov-hero-img fed-print fed-frame fed-frame--print', src: 'images/fedorov-hero/fedorov-print-peeking.webp', alt: '', width: 882, height: 1062, decoding: 'async' }),
+              h('img', { className: 'fedorov-hero-img fed-frame fed-frame--laughing', src: 'images/fedorov-hero/fedorov-frame-laughing.webp', alt: '', width: 1400, height: 1477, decoding: 'async', fetchPriority: 'high' })
+            ),
+            h('div', { className: 'fedorov-hero-depth', style: { '--depth': -30 }, 'aria-hidden': true },
+              h('img', { className: 'fedorov-hero-img fedorov-hero-img--front', src: 'images/fedorov-hero/fedorov-tape-laughing.webp', alt: '', width: 1400, height: 1477, decoding: 'async' }),
+              // маленький дополнительный кадр (тот же файл, что и отпечаток в последовательности)
+              h('img', { className: 'fedorov-hero-img fed-print fed-mini', src: 'images/fedorov-hero/fedorov-print-peeking.webp', alt: '', width: 882, height: 1062, decoding: 'async' })
+            )
           ),
           h('div', { className: 'stage' },
             h(Px, { depth: 6 }, h('div', { className: 'in staff', style: { '--d': '0s', '--fy': '-20vh' } }, h(Staff, { notes: 'none' }))),
@@ -2715,6 +3828,34 @@
 
 
 
+
+
+      /* COMPOSER_SCENES:BEGIN — коллажи композиторов для экранов вопросов (данные слоёв из PSD-сборки) */
+      var COMPOSER_SCENES = { "q1": { "id": "beethoven", "alt": "Коллаж: у Бетховена раскрывается голова, изнутри вылетают ноты, пружина и часы", "layers": [{ "n": "back", "src": "images/composers/beethoven/back.webp", "x": 0, "y": 0, "w": 100, "h": 100 }, { "n": "interior", "src": "images/composers/beethoven/interior.webp", "x": 35.417, "y": 18.333, "w": 48.646, "h": 26.667, "c": "b-interior" }, { "n": "body", "src": "images/composers/beethoven/body.webp", "x": 7.604, "y": 14.25, "w": 92.708, "h": 87.833, "c": "b-body" }, { "n": "cap", "src": "images/composers/beethoven/cap.webp", "x": 35.312, "y": 18.25, "w": 51.042, "h": 27.083, "c": "b-cap" }, { "n": "note1", "src": "images/composers/beethoven/note1.webp", "x": 5.625, "y": 2.667, "w": 18.542, "h": 20.25, "c": "b-fly", "v": { "--sx": "238.7%", "--sy": "115.0%", "--ax": "107.4%", "--ay": "-5.9%" } }, { "n": "gear1", "src": "images/composers/beethoven/gear1.webp", "x": 22.969, "y": 0.792, "w": 17.812, "h": 14.333, "c": "b-fly", "v": { "--sx": "153.1%", "--sy": "196.2%", "--ax": "68.9%", "--ay": "6.9%" } }, { "n": "spring", "src": "images/composers/beethoven/spring.webp", "x": 42.917, "y": -2.167, "w": 13.646, "h": 16.25, "c": "b-fly", "v": { "--sx": "69.0%", "--sy": "185.4%", "--ax": "31.0%", "--ay": "11.6%" } }, { "n": "clock", "src": "images/composers/beethoven/clock.webp", "x": 60.156, "y": -3.125, "w": 22.292, "h": 20.833, "c": "b-fly", "v": { "--sx": "-54.5%", "--sy": "138.2%", "--ax": "-24.5%", "--ay": "6.2%" } }, { "n": "note2", "src": "images/composers/beethoven/note2.webp", "x": 78.229, "y": 12.333, "w": 21.771, "h": 18.75, "c": "b-fly", "v": { "--sx": "-137.6%", "--sy": "76.7%", "--ax": "-61.9%", "--ay": "-27.7%" } }, { "n": "gear2", "src": "images/composers/beethoven/gear2.webp", "x": 79.427, "y": 29.875, "w": 13.333, "h": 10.75, "c": "b-fly", "v": { "--sx": "-202.1%", "--sy": "7.8%", "--ax": "-90.9%", "--ay": "-105.0%" } }, { "n": "note3", "src": "images/composers/beethoven/note3.webp", "x": 6.094, "y": 27.292, "w": 10.104, "h": 16.333, "c": "b-fly", "v": { "--sx": "475.1%", "--sy": "3.8%", "--ax": "213.8%", "--ay": "-69.7%" } }] }, "q2": { "id": "bach", "alt": "Коллаж: невозмутимый Бах в наушниках сводит музыку за пультом диджея", "layers": [{ "n": "back", "src": "images/composers/bach/back.webp", "x": 0, "y": 0, "w": 100, "h": 100 }, { "n": "portrait", "src": "images/composers/bach/portrait.webp", "x": 11.667, "y": 10.167, "w": 79.271, "h": 79.0 }, { "n": "phones", "src": "images/composers/bach/phones.webp", "x": 21.875, "y": 14.5, "w": 57.708, "h": 28.333, "c": "bh-phones" }, { "n": "desk", "src": "images/composers/bach/desk.webp", "x": 2.604, "y": 71.667, "w": 96.042, "h": 29.5, "c": "bh-desk" }, { "n": "record", "src": "images/composers/bach/record.webp", "x": 8.854, "y": 73.333, "w": 31.25, "h": 25.0, "c": "bh-record" }, { "n": "arm", "src": "images/composers/bach/arm.webp", "x": 38.333, "y": 71.417, "w": 10.729, "h": 20.083, "c": "bh-arm" }, { "n": "fader0", "src": "images/composers/bach/fader0.webp", "x": 65.312, "y": 87.917, "w": 4.792, "h": 2.5, "c": "bh-fader" }, { "n": "fader1", "src": "images/composers/bach/fader1.webp", "x": 74.688, "y": 83.75, "w": 4.792, "h": 2.5, "c": "bh-fader" }, { "n": "fader2", "src": "images/composers/bach/fader2.webp", "x": 84.062, "y": 90.417, "w": 4.792, "h": 2.5, "c": "bh-fader" }, { "n": "note0", "src": "images/composers/bach/note0.webp", "x": 3.802, "y": 46.125, "w": 15.417, "h": 14.667, "c": "bh-note", "v": { "--sx": "84.1%", "--sy": "161.1%" } }, { "n": "note1", "src": "images/composers/bach/note1.webp", "x": 83.698, "y": 39.042, "w": 8.958, "h": 16.083, "c": "bh-note", "v": { "--sx": "-711.0%", "--sy": "186.5%" } }, { "n": "note2", "src": "images/composers/bach/note2.webp", "x": 78.073, "y": 59.542, "w": 14.062, "h": 15.25, "c": "bh-note", "v": { "--sx": "-431.1%", "--sy": "65.0%" } }] }, "q3": { "id": "tchaikovsky", "alt": "Коллаж: Чайковский удивлённо таращит бумажные глаза", "layers": [{ "n": "back", "src": "images/composers/tchaikovsky/back.webp", "x": 0, "y": 0, "w": 100, "h": 100 }, { "n": "eyeh0", "src": "images/composers/tchaikovsky/eyeh0.webp", "x": 43.125, "y": 28.917, "w": 10.312, "h": 8.25, "c": "t-eye t-half" }, { "n": "eye0", "src": "images/composers/tchaikovsky/eye0.webp", "x": 42.812, "y": 28.833, "w": 10.625, "h": 8.583, "c": "t-eye t-open" }, { "n": "eyeh1", "src": "images/composers/tchaikovsky/eyeh1.webp", "x": 54.062, "y": 28.917, "w": 10.312, "h": 8.25, "c": "t-eye t-half" }, { "n": "eye1", "src": "images/composers/tchaikovsky/eye1.webp", "x": 54.062, "y": 28.833, "w": 10.625, "h": 8.583, "c": "t-eye t-open" }, { "n": "flake1", "src": "images/composers/tchaikovsky/flake1.webp", "x": 3.75, "y": 5.333, "w": 18.333, "h": 13.167, "c": "t-sway cs-sec" }, { "n": "flake2", "src": "images/composers/tchaikovsky/flake2.webp", "x": 82.083, "y": 4.75, "w": 14.062, "h": 10.25, "c": "t-sway cs-sec" }, { "n": "flake3", "src": "images/composers/tchaikovsky/flake3.webp", "x": 86.354, "y": 48.75, "w": 11.771, "h": 9.25, "c": "t-sway cs-sec" }, { "n": "note1", "src": "images/composers/tchaikovsky/note1.webp", "x": 5.781, "y": 45.417, "w": 15.625, "h": 16.167, "c": "t-drift cs-sec" }, { "n": "note2", "src": "images/composers/tchaikovsky/note2.webp", "x": 65.729, "y": 1.167, "w": 18.333, "h": 14.667, "c": "t-drift cs-sec" }] }, "q4": { "id": "chopin", "alt": "Коллаж: Шопен в наушниках плачет, слёзы превращаются в ноты", "layers": [{ "n": "back", "src": "images/composers/chopin/back.webp", "x": 0, "y": 0, "w": 100, "h": 100 }, { "n": "portrait", "src": "images/composers/chopin/portrait.webp", "x": 15.625, "y": 30.5, "w": 69.792, "h": 72.25 }, { "n": "headphones", "src": "images/composers/chopin/headphones.webp", "x": 21.979, "y": 32.417, "w": 61.667, "h": 45.833, "c": "c-phones" }, { "n": "tless", "src": "images/composers/chopin/tless.webp", "x": 48.646, "y": 61.75, "w": 28.958, "h": 18.667, "c": "c-tear c-tless" }, { "n": "tmid", "src": "images/composers/chopin/tmid.webp", "x": 48.646, "y": 61.75, "w": 29.583, "h": 17.167, "c": "c-tear c-tmid" }, { "n": "tmore", "src": "images/composers/chopin/tmore.webp", "x": 48.646, "y": 61.75, "w": 29.583, "h": 19.75, "c": "c-tear c-tmore" }, { "n": "drop0", "src": "images/composers/chopin/drop0.webp", "x": 51.25, "y": 73.583, "w": 5.833, "h": 6.417, "c": "c-drop", "v": { "--dy": "114.9%" } }, { "n": "nnote0", "src": "images/composers/chopin/nnote0.webp", "x": 7.5, "y": 75.625, "w": 11.562, "h": 12.667, "c": "c-note" }, { "n": "drop1", "src": "images/composers/chopin/drop1.webp", "x": 73.646, "y": 71.833, "w": 5.833, "h": 6.417, "c": "c-drop", "v": { "--dy": "116.2%" } }, { "n": "nnote1", "src": "images/composers/chopin/nnote1.webp", "x": 83.438, "y": 74.042, "w": 7.604, "h": 12.667, "c": "c-note" }, { "n": "drop2", "src": "images/composers/chopin/drop2.webp", "x": 51.25, "y": 73.583, "w": 5.833, "h": 6.417, "c": "c-drop", "v": { "--dy": "257.8%" } }, { "n": "nnote2", "src": "images/composers/chopin/nnote2.webp", "x": 77.812, "y": 84.792, "w": 11.458, "h": 12.75, "c": "c-note" }, { "n": "wave0", "src": "images/composers/chopin/wave0.webp", "x": 91.146, "y": 55.25, "w": 8.438, "h": 11.167, "c": "c-wave cs-sec" }, { "n": "wave1", "src": "images/composers/chopin/wave1.webp", "x": 6.042, "y": 55.25, "w": 8.542, "h": 11.167, "c": "c-wave cs-sec" }] }, "q5": { "id": "stravinsky", "alt": "Коллаж: у Стравинского вместо глаз вращаются виниловые пластинки", "layers": [{ "n": "back", "src": "images/composers/stravinsky/back.webp", "x": 0, "y": 0, "w": 100, "h": 100 }, { "n": "circle", "src": "images/composers/stravinsky/circle.webp", "x": 48.438, "y": 8.083, "w": 49.479, "h": 38.917, "c": "s-circle cs-sec" }, { "n": "bar", "src": "images/composers/stravinsky/bar.webp", "x": -1.458, "y": 25.083, "w": 100.729, "h": 43.25, "c": "s-bar cs-sec" }, { "n": "tri", "src": "images/composers/stravinsky/tri.webp", "x": 3.229, "y": 36.167, "w": 20.104, "h": 17.0, "c": "s-tri cs-sec" }, { "n": "portrait", "src": "images/composers/stravinsky/portrait.webp", "x": 1.771, "y": 42.083, "w": 101.354, "h": 60.583 }, { "n": "vinyl0", "src": "images/composers/stravinsky/vinyl0.webp", "x": 45.208, "y": 56.333, "w": 15.208, "h": 12.083, "c": "s-vinyl" }, { "n": "vinyl1", "src": "images/composers/stravinsky/vinyl1.webp", "x": 62.083, "y": 56.333, "w": 15.104, "h": 12.083, "c": "s-vinyl" }] }, "q6": { "id": "prokofiev", "alt": "Коллаж: Прокофьев-рокер в тёмных очках, гитара и молнии", "layers": [{ "n": "back", "src": "images/composers/prokofiev/back.webp", "x": 0, "y": 0, "w": 100, "h": 100 }, { "n": "poster1", "src": "images/composers/prokofiev/poster1.webp", "x": 1.458, "y": 0.667, "w": 49.062, "h": 32.333, "c": "p-shake cs-sec" }, { "n": "poster2", "src": "images/composers/prokofiev/poster2.webp", "x": 56.25, "y": 7.0, "w": 41.458, "h": 29.167, "c": "p-shake p-shake2 cs-sec" }, { "n": "portrait", "src": "images/composers/prokofiev/portrait.webp", "x": 10.312, "y": 18.417, "w": 76.667, "h": 84.5 }, { "n": "guitar", "src": "images/composers/prokofiev/guitar.webp", "x": 20.573, "y": 59.083, "w": 83.021, "h": 49.667, "c": "p-guitar" }, { "n": "hand", "src": "images/composers/prokofiev/hand.webp", "x": 53.542, "y": 76.417, "w": 29.479, "h": 33.833, "c": "p-hand" }, { "n": "burst0", "src": "images/composers/prokofiev/burst0.webp", "x": 86.042, "y": 34.75, "w": 11.562, "h": 24.0, "c": "p-pop", "v": { "--sx": "-364.9%", "--sy": "165.2%" } }, { "n": "burst1", "src": "images/composers/prokofiev/burst1.webp", "x": 3.229, "y": 55.0, "w": 14.479, "h": 17.083, "c": "p-pop", "v": { "--sx": "270.5%", "--sy": "133.8%" } }, { "n": "burst2", "src": "images/composers/prokofiev/burst2.webp", "x": 80.885, "y": 28.667, "w": 17.083, "h": 13.75, "c": "p-pop", "v": { "--sx": "-233.0%", "--sy": "369.9%" } }, { "n": "burst3", "src": "images/composers/prokofiev/burst3.webp", "x": 5.573, "y": 38.667, "w": 12.812, "h": 10.167, "c": "p-pop", "v": { "--sx": "293.9%", "--sy": "419.5%" } }, { "n": "burst4", "src": "images/composers/prokofiev/burst4.webp", "x": 66.562, "y": 34.083, "w": 13.333, "h": 10.583, "c": "p-pop", "v": { "--sx": "-177.0%", "--sy": "444.3%" } }] }, "q7": { "id": "mozart", "alt": "Коллаж: Моцарт тайком слушает кассету с шансоном", "layers": [{ "n": "back", "src": "images/composers/mozart/back.webp", "x": 0, "y": 0, "w": 100, "h": 100 }, { "n": "portrait", "src": "images/composers/mozart/portrait.webp", "x": 1.458, "y": 6.333, "w": 83.854, "h": 96.5 }, { "n": "cassette", "src": "images/composers/mozart/cassette.webp", "x": 40.156, "y": 69.25, "w": 54.271, "h": 29.25, "c": "m-cas", "v": { "--ty": "14%" } }, { "n": "reel0", "src": "images/composers/mozart/reel0.webp", "x": 54.323, "y": 80.167, "w": 6.146, "h": 4.917, "c": "m-reel", "v": { "--ty": "83.3%" } }, { "n": "reel1", "src": "images/composers/mozart/reel1.webp", "x": 73.385, "y": 80.167, "w": 6.146, "h": 4.917, "c": "m-reel", "v": { "--ty": "83.3%" } }, { "n": "tape", "src": "images/composers/mozart/tape.webp", "x": 83.281, "y": 66.0, "w": 13.854, "h": 8.5, "c": "m-cas-tape" }, { "n": "wire", "src": "images/composers/mozart/wire.webp", "x": 30.521, "y": 40.083, "w": 16.042, "h": 32.0, "c": "m-wire" }, { "n": "bud", "src": "images/composers/mozart/bud.webp", "x": 32.562, "y": 37.567, "w": 6.979, "h": 5.667, "c": "m-bud" }, { "n": "leak0", "src": "images/composers/mozart/leak0.webp", "x": 17.094, "y": 20.858, "w": 11.562, "h": 10.75, "c": "m-leak cs-sec", "v": { "--sx": "111.7%", "--sy": "129.5%" } }, { "n": "leak1", "src": "images/composers/mozart/leak1.webp", "x": 28.552, "y": 13.025, "w": 9.375, "h": 11.833, "c": "m-leak cs-sec", "v": { "--sx": "27.2%", "--sy": "179.2%" } }] } };
+
+      function ComposerScene(p) {
+        var cfg = p.cfg, ref = useRef(null);
+        // анимации ждут декодирования слоёв (не дольше 1.2 с), чтобы бумажки не «моргали»
+        useEffect(function () {
+          var el = ref.current; if (!el) return;
+          var alive = true, timer = 0;
+          var imgs = Array.prototype.slice.call(el.querySelectorAll('img'));
+          var decoded = Promise.all(imgs.map(function (i) { return i.decode ? i.decode().catch(function () { }) : Promise.resolve(); }));
+          var fallback = new Promise(function (r) { timer = setTimeout(r, 1200); });
+          Promise.race([decoded, fallback]).then(function () { clearTimeout(timer); if (alive && el.isConnected) el.classList.add('is-ready'); });
+          return function () { alive = false; clearTimeout(timer); };
+        }, []);
+        var cnt = {};   // порядковый номер внутри своей группы — для задержек
+        return h('div', { className: 'cs cs--' + cfg.id, ref: ref, role: 'img', 'aria-label': cfg.alt },
+          cfg.layers.map(function (l, i) {
+            var st = { left: l.x + '%', top: l.y + '%', width: l.w + '%', height: l.h + '%' };
+            if (l.v) for (var k in l.v) st[k] = l.v[k];
+            if (l.c) { var g = l.c.split(' ')[0]; st['--i'] = cnt[g] = (cnt[g] === undefined ? 0 : cnt[g] + 1); }
+            return h('img', { key: l.n, className: 'cs-l cs-' + l.n + (l.c ? ' ' + l.c : ''), src: l.src, alt: '', draggable: false, decoding: 'async', style: st });
+          }));
+      }
+      /* COMPOSER_SCENES:END */
+
       function Scene(p) {
         var sceneFiles = {
           q1: 'images/question_1_sad.png',
@@ -2727,6 +3868,7 @@
         };
         var src = sceneFiles[p.k];
         var f = SCENES[p.k];
+        if (COMPOSER_SCENES[p.k]) return h('div', { className: 'scene-wrap' }, h(ComposerScene, { key: p.k, cfg: COMPOSER_SCENES[p.k] }));
         return h('div', { className: 'scene-wrap' }, src
           ? h('img', { className: 'question-illustration flap-horizontal', src: src, alt: 'Иллюстрация к вопросу', loading: 'eager', decoding: 'async' })
           : (f ? f() : null));
